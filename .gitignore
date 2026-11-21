@@ -1,0 +1,60 @@
+
+
+*.iml
+.kotlin
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
+local.properties
+.idea
+.DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+node_modules/
+
+
+# Build outputs
+build/
+out/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Gradle
+.gradle/
+local.properties
+
+# IDE (Android Studio / IntelliJ)
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iml
+
+# Android Studio generated
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+
+# Keystore and Signing
+*.jks
+*.keystore
+keystore.properties
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Optional: Google Services (if containing API keys)
+# google-services.json

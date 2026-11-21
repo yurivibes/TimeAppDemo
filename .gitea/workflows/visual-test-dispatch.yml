@@ -1,0 +1,113 @@
+# Visual Test (viewer build): started from MonkeyTester's Build & Test page.
+#
+# MonkeyTester calls Gitea's workflow_dispatch API with the branch the user
+# picked, which runs this file from that branch. The jobs build the app and
+# send it to MonkeyTester like visual-test.yml does, but only for the chosen
+# platforms and cases, and with the viewer's request id so the runs show up
+# under that build in the viewer.
+#
+# The PR workflow (visual-test.yml) is separate and unchanged. This one never
+# runs on push or pull_request: only a person in the viewer starts it.
+#
+# Secrets (repo Settings -> Actions -> Secrets), same as visual-test.yml:
+#   VT_URL       http://192.168.125.70:8089
+#   VT_CI_TOKEN  the viewer's VT_CI_TOKEN value
+
+name: Visual Test (viewer build)
+# The viewer finds this run by its request id if Gitea doesn't return the run id.
+run-name: Visual test ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Platforms to build and test: android, ios or android,ios"
+        required: true
+        default: "android,ios"
+      cases:
+        description: "Comma-separated visual-tests/<case> names; empty runs every case"
+        required: false
+        default: ""
+      request_id:
+        description: "MonkeyTester build id (set by the viewer)"
+        required: true
+
+jobs:
+  android:
+    # The viewer matches jobs to platforms by this name.
+    name: Android
+    if: contains(inputs.platforms, 'android')
+    runs-on: kmp-android
+    timeout-minutes: 120
+    env:
+      PATH: /home/server/.nix-profile/bin:/home/server/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The dev shell (flake.nix) provides JDK 21 and the Android SDK.
+      # visualTest = release settings (not debuggable) signed with the debug
+      # key, so transitions run at release speed (a debuggable APK janks).
+      # :androidApp:assembleVisualTest pulls in no iOS compile tasks.
+      - name: Build visual-test APK
+        run: |
+          nix develop --extra-experimental-features "nix-command flakes" -c \
+            ./gradlew :androidApp:assembleVisualTest \
+            --no-daemon --no-configuration-cache
+
+      - name: Test on Android devices
+        uses: http://192.168.125.70:3000/yurivibes/MonkeyTester/ci/visual-test@master
+        with:
+          url: ${{ secrets.VT_URL }}
+          token: ${{ secrets.VT_CI_TOKEN }}
+          app: androidApp/build/outputs/apk/visualTest/androidApp-visualTest.apk
+          platform: android
+          branch: ${{ github.ref_name }}
+          cases: ${{ inputs.cases }}
+          build-request: ${{ inputs.request_id }}
+
+  ios:
+    name: iOS
+    if: contains(inputs.platforms, 'ios')
+    runs-on: mac-runner
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same as visual-test.yml's ios-visual job: signs with the Mac's Apple
+      # Development identity; the profile must include the test iPhone's UDID.
+      - name: Archive for device
+        run: |
+          xcodebuild archive \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Debug \
+            -destination "generic/platform=iOS" \
+            -archivePath build/visual-test/app.xcarchive \
+            -allowProvisioningUpdates
+
+      - name: Export signed IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/visual-test/app.xcarchive \
+            -exportOptionsPlist iosApp/ExportOptions.plist \
+            -exportPath build/visual-test/export \
+            -allowProvisioningUpdates
+          ipa=$(find build/visual-test/export -name '*.ipa' | head -1)
+          if [ -z "$ipa" ]; then
+            echo "::error::xcodebuild exported no .ipa"
+            exit 1
+          fi
+          mv "$ipa" build/visual-test/app.ipa
+
+      - name: Test on iPhone
+        uses: http://192.168.125.70:3000/yurivibes/MonkeyTester/ci/visual-test@master
+        with:
+          url: ${{ secrets.VT_URL }}
+          token: ${{ secrets.VT_CI_TOKEN }}
+          app: build/visual-test/app.ipa
+          platform: ios
+          branch: ${{ github.ref_name }}
+          cases: ${{ inputs.cases }}
+          build-request: ${{ inputs.request_id }}

@@ -1,0 +1,37 @@
+# Screenshot tests: on every PR into master, compare the transition golden
+# frames (Roborazzi on Robolectric, androidApp/src/test/screenshots) and run
+# the shared unit tests. A changed frame fails the job; the job's artifact
+# holds the *_compare.png images showing what moved.
+#
+# Re-record after an intended UI change:
+#   nix develop -c ./gradlew :androidApp:recordRoborazziDebug
+
+name: Screenshot tests
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  roborazzi:
+    name: Transition frames
+    runs-on: kmp-android
+    timeout-minutes: 60
+    env:
+      PATH: /home/server/.nix-profile/bin:/home/server/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify golden frames and run unit tests
+        run: |
+          nix develop --extra-experimental-features "nix-command flakes" -c \
+            ./gradlew :androidApp:verifyRoborazziDebug :shared:testAndroidHostTest \
+            --no-daemon --no-configuration-cache
+
+      - name: Upload comparison images
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: roborazzi-compare
+          path: androidApp/build/outputs/roborazzi
