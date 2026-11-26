@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # MonkeyTester Build & Test: TimeAppDemo Android build.
 #
-# build-local runs this from the root of a clean checkout of the branch being
-# built, on the plugin's own host, with VT_OUTPUT set to the path the built
+# The build plugin (build-local or build-github) runs this from the root of a clean checkout of the branch being
+# built, on the plugin's own host, with MT_OUTPUT set to the path the built
 # app must be written to.
 set -euo pipefail
 
-: "${VT_OUTPUT:?VT_OUTPUT is not set (this script is run by build-local)}"
+: "${MT_OUTPUT:?MT_OUTPUT is not set (this script is run by a MonkeyTester build plugin)}"
 
 # Gradle reads the SDK location from local.properties; the plugin host sets
 # ANDROID_HOME (the Mac keeps it in ~/Library/Android/sdk).
@@ -37,5 +37,5 @@ if [ ! -s "$apk" ]; then
   echo "error: Gradle produced no APK at $apk" >&2
   exit 1
 fi
-cp "$apk" "$VT_OUTPUT"
-echo "built: $VT_OUTPUT ($(wc -c < "$VT_OUTPUT") bytes)"
+cp "$apk" "$MT_OUTPUT"
+echo "built: $MT_OUTPUT ($(wc -c < "$MT_OUTPUT") bytes)"
