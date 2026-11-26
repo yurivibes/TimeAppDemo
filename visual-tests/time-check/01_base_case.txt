@@ -1,7 +1,7 @@
 SNAPSHOT: initial_screen mask=status_bar,nav_bar
 # Load the hub's answer before the tap: the app asks as the time screen opens,
 # so 10:22 PM is already showing when the slide ends.
-PLUGIN: esp32-server expect
+ESP32-SERVER: expect
   GET ${HUB_PATH}/time -> 200 10:22 PM
 END
 CLICK: Button
