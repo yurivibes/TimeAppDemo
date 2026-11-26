@@ -25,14 +25,14 @@ Build & Test in the MonkeyTester viewer builds this branch on the build plugin's
 running the two scripts committed here, one per platform:
 
 - [.monkeytester/build-android.sh](./.monkeytester/build-android.sh) — `./gradlew :androidApp:assembleDebug`,
-  then copies `androidApp/build/outputs/apk/debug/androidApp-debug.apk` to `$VT_OUTPUT`.
+  then copies `androidApp/build/outputs/apk/debug/androidApp-debug.apk` to `$MT_OUTPUT`.
 - [.monkeytester/build-ios.sh](./.monkeytester/build-ios.sh) — archives `iosApp/iosApp.xcodeproj` for a
-  real iPhone and exports a signed `.ipa` with `iosApp/ExportOptions.plist` to `$VT_OUTPUT`. The
+  real iPhone and exports a signed `.ipa` with `iosApp/ExportOptions.plist` to `$MT_OUTPUT`. The
   Xcode project compiles the shared Kotlin/Native framework itself
   (`:shared:embedAndSignAppleFrameworkForXcode`), so no separate Gradle step runs.
 
-Each script gets `VT_PLATFORM`, `VT_OUTPUT`, `VT_BRANCH`, `VT_CASES` and `VT_REQUEST_ID` from the
-plugin; exit 0 with a non-empty file at `VT_OUTPUT` counts as built, anything else is reported as a
+Each script gets `MT_PLATFORM`, `MT_OUTPUT`, `MT_BRANCH`, `MT_CASES` and `MT_REQUEST_ID` from the
+plugin; exit 0 with a non-empty file at `MT_OUTPUT` counts as built, anything else is reported as a
 build error and its devices show the tests as Unavailable. The Android script needs an Android SDK
 (`ANDROID_HOME`, else `~/Library/Android/sdk` on a Mac) and a JDK; the iOS script runs on the Mac and
 signs with the identity in that user's login keychain, so the provisioning profile must include every

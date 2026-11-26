@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # MonkeyTester Build & Test: TimeAppDemo iOS build (signed .ipa for a real iPhone).
 #
-# build-local runs this from the root of a clean checkout of the branch being
-# built, on the plugin's Mac, with VT_OUTPUT set to the path the built app must
+# The build plugin (build-local or build-github) runs this from the root of a clean checkout of the branch being
+# built, on the plugin's Mac, with MT_OUTPUT set to the path the built app must
 # be written to.
 set -euo pipefail
 
-: "${VT_OUTPUT:?VT_OUTPUT is not set (this script is run by build-local)}"
+: "${MT_OUTPUT:?MT_OUTPUT is not set (this script is run by a MonkeyTester build plugin)}"
 
 if [ ! -d iosApp/iosApp.xcodeproj ]; then
   echo "error: iosApp/iosApp.xcodeproj is missing from this branch" >&2
@@ -41,5 +41,5 @@ if [ -z "$ipa" ]; then
   echo "error: xcodebuild exported no .ipa" >&2
   exit 1
 fi
-cp "$ipa" "$VT_OUTPUT"
-echo "built: $VT_OUTPUT ($(wc -c < "$VT_OUTPUT") bytes)"
+cp "$ipa" "$MT_OUTPUT"
+echo "built: $MT_OUTPUT ($(wc -c < "$MT_OUTPUT") bytes)"
