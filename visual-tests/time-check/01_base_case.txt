@@ -4,15 +4,15 @@ SNAPSHOT: initial_screen mask=status_bar,nav_bar
 ESP32-SERVER: expect
   GET ${HUB_PATH}/time -> 200 10:22 PM
 END
-CLICK: Button
+AI: CLICK Button
 WAIT: 2
 # On a fresh iOS install the first hub poll shows the Local Network permission
 # dialog over the time screen. Dismiss it before the SNAPSHOT so the screen
 # settles (the dialog survives an unanswered run and covers the next run's
 # first screen too).
 IF IOS:
-VERIFY: There is a permission dialog asking to find devices on local networks
-CLICK: the Allow button (OK on iPhone)
+AI: VERIFY There is a permission dialog asking to find devices on local networks
+AI: CLICK the Allow button (OK on iPhone)
 WAIT: 2
 END IF IOS
 # The gesture-bar handle changes shade with the content behind it (nav_bar).
@@ -20,8 +20,8 @@ END IF IOS
 # height per screen class, hence one SNAPSHOT per platform.
 IF ANDROID: SNAPSHOT: time_screen mask=status_bar,nav_bar,rect:100,505,243,36
 IF IOS: SNAPSHOT: time_screen mask=status_bar,nav_bar,rect:66,340,243,36
-VERIFY: There is a time visible of 10:22 PM
-CLICK: Back button
+AI: VERIFY There is a time visible of 10:22 PM
+AI: CLICK Back button
 WAIT: 2
 SNAPSHOT: back_to_start mask=status_bar,nav_bar
-VERIFY: A dark button is on screen
+AI: VERIFY A dark button is on screen
