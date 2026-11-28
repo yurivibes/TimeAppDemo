@@ -1,4 +1,4 @@
-SNAPSHOT: initial_screen mask=status_bar,nav_bar
+DIFF: SNAPSHOT initial_screen mask=status_bar,nav_bar
 # Load the hub's answer before the tap: the app asks as the time screen opens,
 # so 10:22 PM is already showing when the slide ends.
 ESP32-SERVER: expect
@@ -18,10 +18,10 @@ END IF IOS
 # The gesture-bar handle changes shade with the content behind it (nav_bar).
 # The date line changes every day, so it is masked. It sits at a different
 # height per screen class, hence one SNAPSHOT per platform.
-IF ANDROID: SNAPSHOT: time_screen mask=status_bar,nav_bar,rect:100,505,243,36
-IF IOS: SNAPSHOT: time_screen mask=status_bar,nav_bar,rect:66,340,243,36
+IF ANDROID: DIFF: SNAPSHOT time_screen mask=status_bar,nav_bar,rect:100,505,243,36
+IF IOS: DIFF: SNAPSHOT time_screen mask=status_bar,nav_bar,rect:66,340,243,36
 AI: VERIFY There is a time visible of 10:22 PM
 AI: CLICK Back button
 WAIT: 2
-SNAPSHOT: back_to_start mask=status_bar,nav_bar
+DIFF: SNAPSHOT back_to_start mask=status_bar,nav_bar
 AI: VERIFY A dark button is on screen
